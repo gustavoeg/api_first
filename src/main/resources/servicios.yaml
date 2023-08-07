@@ -1,0 +1,443 @@
+openapi: 3.0.0
+info:
+  title: Ruta y Folios API
+  description: >
+    Uso de OpenApi Specification.
+    
+    ---
+    
+    Usando este API se puede crear una solicitud, asignar las nuevas rutas y folios, consultar quien respondió y en que momento, consultar la cantidad de nuevas solicitudes, listar las solicitudes de un agente.
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    name: Beca de investigación
+    url: "https://www.uarg.unpa.edu.ar"
+    email: gustavoeguanuco@gmail.com
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  version: 1.5.0
+
+servers:
+  - url: 'http://localhost:8080/v1'
+    variables:
+      environment:
+        default: api    # Production server
+        enum:
+          - api         # Production server
+          - api.dev     # Development server
+          - api.staging # Staging server
+      protocol:
+        default: https
+        enum:
+          - http
+          - https
+      
+paths:
+  /solicitudes:
+
+    get:
+      tags:
+        - Solicitudes
+      summary: Retorna todas las solicitudes
+      description: Retorna todas las solicitudes requeridas.
+      parameters:
+      - name: legajo_solicitante
+        in: query
+        required: true
+        description: El numero de legajo del solicitante.
+        schema:
+          type : integer
+
+      - name: legajo_respuesta
+        in: query
+        required: false
+        description: El numero de legajo del que respondió.
+        schema:
+          type : integer
+      responses:
+        '200':
+          description: Operación correcta y retorno de las solicitudes en formato JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitudes'
+
+    post:
+      tags:
+        - Solicitudes
+      summary: Creción de una nueva solicitud de Ruta y Folio
+      description: Envío de datos para una nueva solicitud de identificación de servicio (ruta y folio)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Solicitud'
+      responses:
+        '201':
+          description: Petición satisfactoria y como resultado se creó la nueva solicitud.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+        '400':
+          description: Datos incorrectos para la solicitud.
+
+  /solicitudes/{id}:
+
+    get:
+      tags:
+        - Solicitudes
+      summary: Retorna una solicitud
+      description: Recupera una solicitud específica, con su estado de respuesta.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: El ID de la solicitud requerida.
+        schema:
+          type : integer
+      responses:
+        '200':
+          description: Una solicitud de ruta y folio en formato JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudCompleta'
+
+  /solicitudes/{id}/inmuebles:
+
+    post:
+      tags:
+        - Solicitudes
+      summary: Retorna una solicitud
+      description: Recupera una solicitud específica, con su estado de respuesta.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: El ID de la solicitud requerida.
+        schema:
+          type : integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Inmuebles'
+      responses:
+        '200':
+          description: Se agregaron los inmuebles a la solicitud en formato JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudCompleta'
+
+  /solicitudes/{id}/inmuebles/{id_inmueble}:
+    delete:
+      tags:
+        - Solicitudes
+      summary: Elimina los inmuebles de una solicitud
+      description: Elimina los inmuebles de la solicitud por id.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador de la solicitud.
+        schema:
+          type : integer
+      - name: id_inmueble
+        in: path
+        required: true
+        description: Identificador del inmueble.
+        schema:
+          type : integer
+      responses:
+        '204':
+          description: La solicitud fue eliminada correctamente.
+  
+  /solicitudes/rechazadas:
+    get:
+      tags:
+        - Solicitudes
+      summary: Recuperar las solicitudes rechazadas
+      description: Recupera todas las solicitudes que fueron rechazadas.
+      parameters:
+      - name: legajo_solicitante
+        in: query
+        required: false
+        description: El numero de legajo del solicitante.
+        schema:
+          type : integer
+      responses:
+        '200':
+          description: Operación correcta y retorno de las solicitudes en formato JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitudes'
+    
+  /solicitudes/nuevas:
+
+    get:
+      tags:
+        - Solicitudes
+      summary: Cantidad de solicitudes sin responder.
+      description: Recupera la cantidad de solicitudes nuevas sin responder.
+      responses:
+        '200':
+          description: Operación correcta y retorno de la cantidad en formato JSON
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  num_solicitudes_nuevas:
+                    type: number
+                    description: cantidad de solicitudes nuevas (sin atender)
+                    minimum: 0
+                    example: 5
+
+  /asignar:
+
+    post:
+      tags:
+        - Asignación
+      summary: Asignación de Rutas y Folios
+      description: Asigna las rutas y folios de los servicios requeridos en la solicitud
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResponderAsignar'
+      responses:
+        '201':
+          description: Petición satisfactoria y como resultado se asignó las rutas y folios a los servicios de la nueva solicitud.
+
+components:
+  schemas:
+    Solicitudes:
+      description: "Un arreglo de solicitudes completas."
+      type: array
+      items:
+        $ref: '#/components/schemas/SolicitudCompleta'
+
+    Solicitud:
+      type: object
+      properties:
+        id_solicitud:
+          type: integer
+          description: "identificador de solicitud."
+        tipo_mza: 
+          type: string
+          enum: ["manzana", "fraccion", "quinta", "chacra"]
+          description: "parte de la identificación catastral, los posibles valores son manzana, fracción, quinta, chacra"
+        nro_mza:
+          type: string
+          description: "valor asociado al tipo_mza, ej '2431-1'"
+        tipo_lote:
+          type: string
+          enum: ["lote", "parcela"]
+          description: "parte de la identificación catastral, los posibles valores son Lote y Parcela."
+        nro_lote:
+          type: string
+          description: "valor asociado al tipo_lote, ej '31/A'"
+        seccion:
+          type: string
+          enum: ["A", "B", "C", "D", "E", "F", "G"]
+          description: "parte de la identificación catastral"
+        circunscripcion:
+          type: string
+          enum: ["I","II","III","IV","V","VI","VII"]
+          description: "parte de la identificación catastral"
+        barrio:
+          type: string
+          description: "Barrio donde está ubicado el inmueble"
+        legajo_solicitud:
+          type: integer
+          description: "Legajo del agente de atención al público que realiza la solicitud"
+        fecha_solicitud:
+          type: string
+          format: date-time
+          description: "fecha y hora en la que se realiza la solicitud."
+      required:
+        - id_solicitud
+        - tipo_mza
+        - nro_mza
+        - tipo_lote
+        - nro_lote
+        - seccion
+        - circunscripcion
+        - barrio
+        - legajo_solicitud
+        - fecha_solicitud
+      example:
+          id_solicitud: 1
+          tipo_mza: 'manzana'
+          nro_mza: '123A'
+          tipo_lote: 'lote'
+          nro_lote: '15/1'
+          seccion: 'A'
+          circunscripcion: 'V'
+          barrio: 'Belgrano'
+          legajo_solicitud: 1520
+          fecha_solicitud: '2023-05-10T18:07:25.000-03:00'
+
+    Inmuebles:
+      description: "Arreglo de objetos Inmueble"
+      type: array
+      items:
+        $ref: '#/components/schemas/Inmueble'
+      example: [
+        {
+          "id_inmueble": 1,
+          "tipo": "loc",
+          "numero-letra": "1",
+          "id_solicitud": 1
+        },
+        {
+          "id_inmueble": 2,
+          "tipo": "dpto",
+          "numero-letra": "A",
+          "id_solicitud": 2
+        },
+        {
+          "id_inmueble": 3,
+          "tipo": "sc",
+          "numero-letra": "2",
+          "id_solicitud": 3
+        },
+        {
+          "id_inmueble": 4,
+          "tipo": "ppal",
+          "numero-letra": "3",
+          "id_solicitud": 3
+        }
+      ]
+
+    Inmueble:
+      type: object
+      properties:
+        id_inmueble:
+          type: integer
+          description: "Identificador del inmueble"
+        tipo:
+          type: string
+          enum: ["ppal","loc","dpto","sc"]
+          description: "Si se trata de un local (loc), departamento (dpto) o servicio comunitario (sc)"
+        numero-letra:
+          type: string
+          description: "Número o letra para local o dpto"
+        id_solicitud:
+          type: integer
+          description: "Identificador de la solicitud"        
+      example:
+        id_inmueble: 1
+        tipo: 'dpto'
+        numero-letra: "A"
+        id_solicitud: "1"
+
+    Respuesta:
+      type: object
+      properties:
+        id_solicitud:
+          type: integer
+          description: "Identificador de la solicitud"
+        respuesta:
+          type: string
+          enum: ["A","R"]
+          description: "Si a la solicitud se le asignó (A) o si fue rechazada (R)"
+        detalles:
+          type: string
+          description: "se incluyen observaciones relevantes en la respuesta"
+        legajo_respuesta:
+          type: integer
+          description: "legajo del agente que reponde la solicitud"
+        fecha_respuesta:
+          type: string
+          format: date-time
+          description: "fecha y hora en la que se responde la solicitud."
+      example:
+        id_solicitud: 1
+        respuesta: 'A'
+        detalles: "Una observación relevante"
+        legajo_respuesta: 3030
+        fecha_respuesta: '2023-05-10T19:18:25.000-03:00'
+
+    Asignaciones:
+      description: "Arreglo de objetos Asignacion"
+      type: array
+      items:
+        $ref: '#/components/schemas/Asignacion'
+      example: [
+        {
+          "id_inmueble": 1,
+          "ruta": 100,
+          "folio": 2030
+        },
+        {
+          "id_inmueble": 2,
+          "ruta": 100,
+          "folio": 2032
+        },
+        {
+          "id_inmueble": 3,
+          "ruta": 100,
+          "folio": 2034
+        }
+      ]
+
+    Asignacion:
+      type: object
+      properties:
+        id_inmueble:
+          type: integer
+          description: "Identificador del inmueble"
+        ruta:
+          type: integer
+          minimum: 1
+          description: "Ruta que se asigna al servicio"
+        folio:
+          type: integer
+          description: "Folio que se asigna al servicio"
+      example:
+        id_inmueble: 1
+        ruta: 100
+        folio: 2030
+
+    Rechazo:
+      type: object
+      properties:
+        id_solicitud:
+          type: integer
+          description: "Identificador de la solicitud"
+        causa:
+          type: string
+          enum: ["S","N","F"]
+          description: "Razón por la que no se puede asignar la ruta y folio para los nuevos servicios. Los valores pueden ser sujeto inspección (s), no coinciden datos (n) y faltan datos (f)"
+      example:
+        id_solicitud: 1
+        causa: 'S'
+    
+    ResponderAsignar:
+      type: object
+      properties:
+        asignaciones:
+          $ref: '#/components/schemas/Asignaciones'
+        respuesta:
+          $ref: '#/components/schemas/Respuesta'
+
+    SolicitudCompleta:
+      type: object
+      properties:
+        solicitud:
+          $ref: '#/components/schemas/Solicitud'
+        inmuebles:
+          $ref: '#/components/schemas/Inmuebles'
+        asignaciones:
+          $ref: '#/components/schemas/Asignaciones'
+        respuesta:
+          $ref: '#/components/schemas/Respuesta'
+        rechazo:
+          $ref: '#/components/schemas/Rechazo'
