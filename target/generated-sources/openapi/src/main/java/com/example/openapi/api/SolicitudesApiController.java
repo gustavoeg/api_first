@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -69,6 +70,15 @@ public class SolicitudesApiController implements SolicitudesApi {
 	public ResponseEntity<SolicitudCompleta> solicitudesIdGet(Integer id) {
 		//return SolicitudesApi.super.solicitudesIdGet(id);
 		return solicitudService.solicitudesIdGet(id);
+	}
+
+
+
+	@Override
+	public ResponseEntity<List<SolicitudCompleta>> solicitudesGet(@NotNull @Valid Integer legajoSolicitante,
+			@Valid Integer legajoRespuesta) {
+		// TODO Auto-generated method stub
+		return SolicitudesApi.super.solicitudesGet(legajoSolicitante, legajoRespuesta);
 	}
 
 
