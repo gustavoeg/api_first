@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,15 +36,11 @@ public class SolicitudService {
 	@Autowired
 	private AsignacionRepository asignacionRepository;
 
-//	public ResponseEntity<Solicitud> solicitudIdGet(Integer id) {
-//		return ResponseEntity.ok().body(solicitudRepository.findById(Integer.valueOf(id)).get());
-//	}
 
 	//POST de solicitudes, para guardar una solicitud
 	public ResponseEntity<Solicitud> solicitudesPost(Solicitud solicitud) {
-//		solicitudRepository.save(solicitud);
+
 		return ResponseEntity.ok().body(solicitudRepository.save(solicitud));
-//		return ResponseEntity.ok().build();
 	}
 	
 	/**
@@ -55,10 +49,11 @@ public class SolicitudService {
 	 * @return
 	 */
 	public SolicitudCompleta solicitudesIdGet(Integer id) {
-		// TODO Auto-generated method stub
+
 		//obtencion de la solicitud
 		Solicitud solicitud = solicitudRepository.findById(id).get();
 		List<Inmueble> inmuebles = inmuebleRepository.findByIdSolicitud(solicitud.getIdSolicitud().intValue());
+
 		//verifico que la respuesta no sea nula
 		Respuesta respuesta;
 		Optional<Respuesta> respuestaOptional = respuestaRepository.findById(solicitud.getIdSolicitud());
@@ -66,7 +61,7 @@ public class SolicitudService {
 		Rechazo rechazo = null;
 		if (respuestaOptional.isPresent()) {
 			respuesta =  respuestaOptional.get();
-		    // processing with foo ...
+
 			//consulto si la respuesta fue aceptada o rechazada
 			if(respuesta.getRespuesta() == Respuesta.RespuestaEnum.fromValue("A")) {
 				//consulto por las asignaciones
@@ -82,20 +77,17 @@ public class SolicitudService {
 			}
 			System.out.print("respuesta:" + respuesta.getRespuesta());
 		} else {
-		    // alternative processing....
 			respuesta = null;
 		}
 		
 		//verifico que el rechazo no sea nulo
-		//Rechazo rechazo = rechazoRepository.findById(solicitud.getIdSolicitud()).get();
 		SolicitudCompleta sol_completa = new SolicitudCompleta();
 		sol_completa.solicitud(solicitud);
 		sol_completa.setInmuebles(inmuebles);
 		sol_completa.setRespuesta(respuesta);
 		sol_completa.setRechazo(rechazo);
-		//sol_completa.setRechazo(null);
 		sol_completa.setAsignaciones(listado_asignacion);
-		//return SolicitudesApi.super.solicitudesIdGet(id);
+
 		return sol_completa;
 	}
 

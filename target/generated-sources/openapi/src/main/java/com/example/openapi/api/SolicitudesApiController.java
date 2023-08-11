@@ -2,9 +2,7 @@ package com.example.openapi.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -18,7 +16,6 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -57,8 +54,7 @@ public class SolicitudesApiController implements SolicitudesApi {
      */
 	@Override
 	public ResponseEntity<SolicitudCompleta> solicitudesIdInmueblesPost(Integer id, @Valid List<Inmueble> inmueble) {
-		// TODO Auto-generated method stub
-		//return SolicitudesApi.super.solicitudesIdInmueblesPost(id, inmueble);
+
 		inmuebleService.inmueblePost(id,inmueble);
 		return ResponseEntity.ok().body(solicitudService.solicitudesIdGet(id));
 	}
@@ -69,7 +65,7 @@ public class SolicitudesApiController implements SolicitudesApi {
 	 */
 	@Override
 	public ResponseEntity<SolicitudCompleta> solicitudesIdGet(Integer id) {
-		//return SolicitudesApi.super.solicitudesIdGet(id);
+
 		return ResponseEntity.ok().body(solicitudService.solicitudesIdGet(id));
 	}
 
@@ -80,7 +76,7 @@ public class SolicitudesApiController implements SolicitudesApi {
 	 */
 	@Override
 	public ResponseEntity<List<SolicitudCompleta>> solicitudesRechazadasGet(@Valid Integer legajoSolicitante) {
-		// TODO Auto-generated method stub
+
 		return solicitudService.solicitudesRechazadasGet(legajoSolicitante);
 	}
 
@@ -91,7 +87,7 @@ public class SolicitudesApiController implements SolicitudesApi {
 	@Override
 	public ResponseEntity<List<SolicitudCompleta>> solicitudesGet(@NotNull @Valid Integer legajoSolicitante,
 			@Valid Integer legajoRespuesta) {
-		// TODO Auto-generated method stub
+
 		return solicitudService.solicitudesGet(legajoSolicitante, legajoRespuesta);
 	}
 

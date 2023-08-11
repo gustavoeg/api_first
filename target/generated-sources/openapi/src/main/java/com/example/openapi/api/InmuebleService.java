@@ -9,19 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.openapi.model.Inmueble;
-import com.example.openapi.model.Solicitud;
-import com.example.openapi.model.SolicitudCompleta;
 
 @Service
 public class InmuebleService {
 	@Autowired
 	private InmuebleRepository inmuebleRepository;
 
-//	public ResponseEntity<Solicitud> solicitudIdGet(Integer id) {
-//		return ResponseEntity.ok().body(solicitudRepository.findById(Integer.valueOf(id)).get());
-//	}
-
-	
 	/**
 	 * POST de solicitudes, para guardar una solicitud
 	 * 
@@ -34,9 +27,7 @@ public class InmuebleService {
 			inmueble.setIdSolicitud(id);
 			inmuebleRepository.save(inmueble);
 		}
-		//SolicitudCompleta sol_completa = new SolicitudCompleta();
 		return ResponseEntity.ok().build();
-		//return ResponseEntity.ok().body(sol_completa);
 	}
 
 }
