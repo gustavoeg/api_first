@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +54,7 @@ public class SolicitudService {
 	 * @param id
 	 * @return
 	 */
-	public ResponseEntity<SolicitudCompleta> solicitudesIdGet(Integer id) {
+	public SolicitudCompleta solicitudesIdGet(Integer id) {
 		// TODO Auto-generated method stub
 		//obtencion de la solicitud
 		Solicitud solicitud = solicitudRepository.findById(id).get();
@@ -78,7 +80,7 @@ public class SolicitudService {
 				rechazo = rechazoRepository.findById(solicitud.getIdSolicitud()).get();
 				listado_asignacion = null;
 			}
-			System.out.print("respuyesta:" + respuesta.getRespuesta());
+			System.out.print("respuesta:" + respuesta.getRespuesta());
 		} else {
 		    // alternative processing....
 			respuesta = null;
@@ -94,9 +96,28 @@ public class SolicitudService {
 		//sol_completa.setRechazo(null);
 		sol_completa.setAsignaciones(listado_asignacion);
 		//return SolicitudesApi.super.solicitudesIdGet(id);
-		return ResponseEntity.ok().body(sol_completa);
+		return sol_completa;
 	}
 
+	public ResponseEntity<List<SolicitudCompleta>> solicitudesRechazadasGet(Integer legajoSolicitante) {
+		List<Solicitud> solicitudes;
+		if(legajoSolicitante == null) {
+			solicitudes  = solicitudRepository.getSolicitudesRechazadas();
+		}else {
+			solicitudes  = solicitudRepository.getSolicitudesRechazadasByLegajo(legajoSolicitante);
+		}
+		
+		List<SolicitudCompleta> listado_solicitudes = null;
+		listado_solicitudes = new ArrayList<SolicitudCompleta>();
+		
+		//por cada solicitud obtengo la solicitud completa por su id
+		for (Solicitud solicitud : solicitudes) {
+			listado_solicitudes.add(this.solicitudesIdGet(solicitud.getIdSolicitud())) ;
+		}
+		
+		return ResponseEntity.ok().body(listado_solicitudes);
+	}
+	
 	/**
 	 * GET de Nuevas solicitudes
 	 */
@@ -105,5 +126,29 @@ public class SolicitudService {
 		InlineResponse200 respuesta = new InlineResponse200();
 		respuesta.setNumSolicitudesNuevas(numNuevas);
 		return ResponseEntity.ok().body(respuesta);
+	}
+	
+	/**
+	 * GET de solicitudes respondidas por un agente especifico
+	 */
+	public ResponseEntity<List<SolicitudCompleta>> solicitudesGet(Integer legajoSolicitante,
+			@Null Integer legajoRespuesta){
+		List<Solicitud> solicitudes;
+		if(legajoRespuesta == null) {
+			solicitudes  = solicitudRepository.findByLegajoSolicitud(legajoSolicitante);
+		}else {
+			solicitudes  = solicitudRepository.findByLegajoRespuesta(legajoSolicitante,legajoRespuesta);
+		}
+		
+		
+		List<SolicitudCompleta> listado_solicitudes = null;
+		listado_solicitudes = new ArrayList<SolicitudCompleta>();
+		
+		//por cada solicitud obtengo la solicitud completa por su id
+		for (Solicitud solicitud : solicitudes) {
+			listado_solicitudes.add(this.solicitudesIdGet(solicitud.getIdSolicitud())) ;
+		}
+		
+		return ResponseEntity.ok().body(listado_solicitudes);
 	}
 }

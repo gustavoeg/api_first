@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -59,7 +60,7 @@ public class SolicitudesApiController implements SolicitudesApi {
 		// TODO Auto-generated method stub
 		//return SolicitudesApi.super.solicitudesIdInmueblesPost(id, inmueble);
 		inmuebleService.inmueblePost(id,inmueble);
-		return solicitudService.solicitudesIdGet(id);
+		return ResponseEntity.ok().body(solicitudService.solicitudesIdGet(id));
 	}
 
 
@@ -69,16 +70,29 @@ public class SolicitudesApiController implements SolicitudesApi {
 	@Override
 	public ResponseEntity<SolicitudCompleta> solicitudesIdGet(Integer id) {
 		//return SolicitudesApi.super.solicitudesIdGet(id);
-		return solicitudService.solicitudesIdGet(id);
+		return ResponseEntity.ok().body(solicitudService.solicitudesIdGet(id));
 	}
 
 
 
+	/**
+	 * GET de las solicitudes rechazadas
+	 */
+	@Override
+	public ResponseEntity<List<SolicitudCompleta>> solicitudesRechazadasGet(@Valid Integer legajoSolicitante) {
+		// TODO Auto-generated method stub
+		return solicitudService.solicitudesRechazadasGet(legajoSolicitante);
+	}
+
+
+	/**
+	 * GET solicitud por legajo solicitante y/o respondida por un determinado agente (identificados por legajo)
+	 */
 	@Override
 	public ResponseEntity<List<SolicitudCompleta>> solicitudesGet(@NotNull @Valid Integer legajoSolicitante,
 			@Valid Integer legajoRespuesta) {
 		// TODO Auto-generated method stub
-		return SolicitudesApi.super.solicitudesGet(legajoSolicitante, legajoRespuesta);
+		return solicitudService.solicitudesGet(legajoSolicitante, legajoRespuesta);
 	}
 
 
